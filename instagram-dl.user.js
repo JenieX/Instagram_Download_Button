@@ -9,7 +9,7 @@
 // @name:hi             इंस्टाग्राम डाउनलोडर
 // @name:ru             Загрузчик Instagram
 // @namespace           https://github.com/y252328/Instagram_Download_Button
-// @version             1.17.19
+// @version             1.17.21
 // @description         Add the download button and the open button to download or open profile picture and media in the posts, stories, and highlights in Instagram
 // @description:zh-TW   在Instagram頁面加入下載按鈕與開啟按鈕，透過這些按鈕可以下載或開啟大頭貼與貼文、限時動態、Highlight中的照片或影片
 // @description:zh-CN   在Instagram页面加入下载按钮与开启按钮，透过这些按钮可以下载或开启大头贴与贴文、限时动态、Highlight中的照片或影片
@@ -145,7 +145,8 @@
 
     var checkExistTimer = setInterval(function () {
         const curUrl = window.location.href;
-        const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
+        const savePostSelector = 'article *:not(li)>section>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
+        //const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
         const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
         const profileSelector = 'header section svg circle';
         const playSvgPathSelector = 'path[d="M5.888 22.5a3.46 3.46 0 0 1-1.721-.46l-.003-.002a3.451 3.451 0 0 1-1.72-2.982V4.943a3.445 3.445 0 0 1 5.163-2.987l12.226 7.059a3.444 3.444 0 0 1-.001 5.967l-12.22 7.056a3.462 3.462 0 0 1-1.724.462Z"]';
@@ -447,12 +448,13 @@
                 return null;
             }
 
-            async function findMediaId() {
+            async function findMediaId(mediaIdx) {
                 // method 4
-                function method4() {
+                function method4(mediaIdx) {
                     let href = window.location.href;
-                    let match = document.body.innerHTML.match(/"id":"(\d+_\d+)"/);
-                    if (href.includes('stories') && match) return match[1];
+                    // let match = document.body.innerHTML.match(/"id":"(\d+_\d+)"/);
+                    let matchs = [...document.body.innerHTML.matchAll(/"id":"(\d+_\d+)"/g)];
+                    if (href.includes('stories') && matchs.length > mediaIdx) return matchs[mediaIdx][1];
                     return null;
                 }
 
@@ -504,7 +506,7 @@
                     return null;
                 }
 
-                return method4() || method1() || await method3() || method2();
+                return method1() || await method3() || method2();
             }
 
             function getImgOrVedioUrl(item) {
@@ -527,7 +529,7 @@
                 mode: 'cors'
             };
 
-            let mediaId = await findMediaId();
+            let mediaId = await findMediaId(mediaIdx);
             if (!mediaId) {
                 console.log("Cannot find media id");
                 return null;
@@ -537,7 +539,7 @@
                 let resp = await fetch(url, headers);
                 if (resp.status !== 200) {
                     console.log(`Fetch info API failed with status code: ${resp.status}`);
-                    console.log(`context: ${await resp.json()}`);
+                    console.log(`context: ${JSON.stringify(await resp.json(), space=2)}`);
                     return null;
                 }
                 let respJson = await resp.json();
@@ -790,7 +792,7 @@
         }
         fetch(url, {
             headers: new Headers({
-                'User-Agent': window.navigator.userAgent,
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)', //window.navigator.userAgent,
                 Origin: location.origin,
             }),
             mode: 'cors',
