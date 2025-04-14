@@ -61,6 +61,9 @@
     const postIdPattern = /^\/p\/([^/]+)\//;
     const postUrlPattern = /instagram\.com\/p\/[\w-]+\//;
 
+    const reelIdPattern = /^\/reel\/([^/]+)\//;
+    const reelUrlPattern = /instagram\.com\/reel\/[\w-]+\//;
+
     var svgDownloadBtn = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="24" width="24"
      viewBox="0 0 477.867 477.867" style="fill:%color;" xml:space="preserve">
     <g>
@@ -132,6 +135,10 @@
         return Boolean(window.location.href.match(postUrlPattern));
     }
 
+    function isReelPage() {
+        return Boolean(window.location.href.match(reelUrlPattern));
+    }
+
     function queryHas(root, selector, has) {
         let nodes = root.querySelectorAll(selector);
         for (let i = 0; i < nodes.length; ++i) {
@@ -146,6 +153,7 @@
     var checkExistTimer = setInterval(function () {
         const curUrl = window.location.href;
         const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]),  article section:first-child span:nth-of-type(3) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
+        const singlePostSelector = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[2]/div/div/div';
         //const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
         const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
         const profileSelector = 'header section svg circle';
@@ -172,7 +180,7 @@
         }
 
         // check independent post page
-        if (isPostPage()) {
+        if (isPostPage() || isReelPage()) {
             let savebtn = queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'polygon[points="20 21 12 13.44 4 21 4 3 20 3 20 21"]') || queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'path[d="M20 22a.999.999 0 0 1-.687-.273L12 14.815l-7.313 6.912A1 1 0 0 1 3 21V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1Z"]');
             if (document.getElementsByClassName('custom-btn').length === 0) {
                 if (savebtn.parentNode.querySelector('svg')) {
@@ -594,6 +602,9 @@
             if (link) {
                 let match = link.match(postIdPattern);
                 if (match) return match[1];
+                else
+                    match = link.match(reelIdPattern);
+                    if (match) return match[1];
             }
         }
         return null;
