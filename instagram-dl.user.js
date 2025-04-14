@@ -145,7 +145,7 @@
 
     var checkExistTimer = setInterval(function () {
         const curUrl = window.location.href;
-        const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
+        const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]),  article section:first-child span:nth-of-type(3) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
         //const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
         const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
         const profileSelector = 'header section svg circle';
