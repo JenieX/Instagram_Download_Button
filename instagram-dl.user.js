@@ -27,7 +27,7 @@
 // ==/UserScript==
 
 // TO-DO:
-//   - replace the checking timer with the observer
+//   - ✓ replaced the checking timer with MutationObserver
 
 (function () {
     'use strict';
@@ -150,18 +150,22 @@
         return null;
     }
 
-    var checkExistTimer = setInterval(function () {
-        const curUrl = window.location.href;
-        const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]),  article section:first-child span:nth-of-type(3) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
-        const singlePostSelector = 'section section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';  //'/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[2]/div/div/div';
-        //const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
-        const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
-        const profileSelector = 'header section svg circle';
-        const playSvgPathSelector = 'path[d="M5.888 22.5a3.46 3.46 0 0 1-1.721-.46l-.003-.002a3.451 3.451 0 0 1-1.72-2.982V4.943a3.445 3.445 0 0 1 5.163-2.987l12.226 7.059a3.444 3.444 0 0 1-.001 5.967l-12.22 7.056a3.462 3.462 0 0 1-1.724.462Z"]';
-        const pauseSvgPathSelector = 'path[d="M15 1c-3.3 0-6 1.3-6 3v40c0 1.7 2.7 3 6 3s6-1.3 6-3V4c0-1.7-2.7-3-6-3zm18 0c-3.3 0-6 1.3-6 3v40c0 1.7 2.7 3 6 3s6-1.3 6-3V4c0-1.7-2.7-3-6-3z"]';
+    // Selectors for different elements
+    const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]),  article section:first-child span:nth-of-type(3) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
+    const singlePostSelector = 'section section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
+    const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
+    const profileSelector = 'header section svg circle';
+    const playSvgPathSelector = 'path[d="M5.888 22.5a3.46 3.46 0 0 1-1.721-.46l-.003-.002a3.451 3.451 0 0 1-1.72-2.982V4.943a3.445 3.445 0 0 1 5.163-2.987l12.226 7.059a3.444 3.444 0 0 1-.001 5.967l-12.22 7.056a3.462 3.462 0 0 1-1.724.462Z"]';
+    const pauseSvgPathSelector = 'path[d="M15 1c-3.3 0-6 1.3-6 3v40c0 1.7 2.7 3 6 3s6-1.3 6-3V4c0-1.7-2.7-3-6-3zm18 0c-3.3 0-6 1.3-6 3v40c0 1.7 2.7 3 6 3s6-1.3 6-3V4c0-1.7-2.7-3-6-3z"]';
 
+    function getIconColor() {
         let rgb = getComputedStyle(document.body).backgroundColor.match(/[.?\d]+/g);
-        let iconColor = (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114) <= 150 ? 'white' : 'black'
+        return (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114) <= 150 ? 'white' : 'black';
+    }
+
+    function checkAndAddButtons() {
+        const curUrl = window.location.href;
+        const iconColor = getIconColor();
 
         // clear all custom buttons when url changing
         if (preUrl !== curUrl) {
@@ -178,11 +182,12 @@
                 addCustomBtn(buttonAnchor, iconColor, append2Post);
             }
         }
+        
         // check independent post page
         if (isPostPage() || isReelPage()) {
             let savebtn = queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'polygon[points="20 21 12 13.44 4 21 4 3 20 3 20 21"]') || queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'path[d="M20 22a.999.999 0 0 1-.687-.273L12 14.815l-7.313 6.912A1 1 0 0 1 3 21V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1Z"]');
             if (document.getElementsByClassName('custom-btn').length === 0) {
-                if (savebtn.parentNode.querySelector('svg')) {
+                if (savebtn && savebtn.parentNode.querySelector('svg')) {
                     addCustomBtn(savebtn.parentNode.querySelector('svg'), iconColor, append2IndependentPost);
                 }
             }
@@ -205,7 +210,47 @@
         }
 
         preUrl = curUrl;
-    }, 500);
+    }
+
+    // Initial check
+    checkAndAddButtons();
+
+    // MutationObserver to watch for DOM changes
+    const observer = new MutationObserver(function(mutations) {
+        let shouldCheck = false;
+        
+        for (let mutation of mutations) {
+            if (mutation.type === 'childList') {
+                // Check if new nodes were added
+                if (mutation.addedNodes.length > 0) {
+                    shouldCheck = true;
+                    break;
+                }
+            }
+        }
+        
+        if (shouldCheck) {
+            // Debounce the checking to avoid excessive calls
+            clearTimeout(observer.checkTimeout);
+            observer.checkTimeout = setTimeout(checkAndAddButtons, 100);
+        }
+    });
+
+    // Start observing
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Also listen to navigation changes (for SPA navigation)
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+        const url = location.href;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            setTimeout(checkAndAddButtons, 100);
+        }
+    }).observe(document, { subtree: true, childList: true });
 
     function append2Post(node, btn) {
         node.append(btn);
