@@ -8,8 +8,8 @@
 // @name:fr             Téléchargeur Instagram
 // @name:hi             इंस्टाग्राम डाउनलोडर
 // @name:ru             Загрузчик Instagram
-// @namespace           https://github.com/y252328/Instagram_Download_Button
-// @version             1.17.22
+// @namespace           https://github.com/tldkhoa/Instagram_Download_Button
+// @version             1.17.23
 // @description         Add the download button and the open button to download or open profile picture and media in the posts, stories, and highlights in Instagram
 // @description:zh-TW   在Instagram頁面加入下載按鈕與開啟按鈕，透過這些按鈕可以下載或開啟大頭貼與貼文、限時動態、Highlight中的照片或影片
 // @description:zh-CN   在Instagram页面加入下载按钮与开启按钮，透过这些按钮可以下载或开启大头贴与贴文、限时动态、Highlight中的照片或影片
@@ -59,10 +59,10 @@
     // ==================
 
     const postIdPattern = /^\/p\/([^/]+)\//;
-    const postUrlPattern = /instagram\.com\/p\/[\w-]+\//;
+    const postUrlPattern = /instagram\.com\/p\/[\w-]+\/?/;
 
     const reelIdPattern = /^\/reel\/([^/]+)\//;
-    const reelUrlPattern = /instagram\.com\/reel\/[\w-]+\//;
+    const reelUrlPattern = /instagram\.com\/reel\/[\w-]+\/?/;
 
     var svgDownloadBtn = `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="24" width="24"
      viewBox="0 0 477.867 477.867" style="fill:%color;" xml:space="preserve">
@@ -153,7 +153,7 @@
     var checkExistTimer = setInterval(function () {
         const curUrl = window.location.href;
         const savePostSelector = 'article section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]), article section:first-child span:nth-of-type(4) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"]),  article section:first-child span:nth-of-type(3) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';
-        const singlePostSelector = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[2]/div/div/div';
+        const singlePostSelector = 'section section:first-child div:nth-of-type(2) div[role=\"button\"]:not([style]):not([tabindex=\"-1\"])';  //'/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[2]/div/div/div';
         //const savePostSelector = 'article *:not(li)>*>*>*>div:not([class])>div[role="button"]:not([style]):not([tabindex="-1"])';
         const storySelector = 'section > *:not(main) header div>svg:not([aria-label=""])';
         const profileSelector = 'header section svg circle';
@@ -178,7 +178,6 @@
                 addCustomBtn(buttonAnchor, iconColor, append2Post);
             }
         }
-
         // check independent post page
         if (isPostPage() || isReelPage()) {
             let savebtn = queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'polygon[points="20 21 12 13.44 4 21 4 3 20 3 20 21"]') || queryHas(document, 'div[role="button"] > div[role="button"]:not([style])', 'path[d="M20 22a.999.999 0 0 1-.687-.273L12 14.815l-7.313 6.912A1 1 0 0 1 3 21V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1Z"]');
