@@ -587,7 +587,7 @@
                 return null;
             }
             if (!(mediaId in infoCache)) {
-                let url = 'https://i.instagram.com/api/v1/media/' + mediaId + '/info/';
+                let url = 'https://www.instagram.com/api/v1/media/' + mediaId + '/info/';
                 let resp = await fetch(url, headers);
                 if (resp.status !== 200) {
                     console.log(`Fetch info API failed with status code: ${resp.status}`);
